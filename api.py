@@ -26,61 +26,57 @@ def index():
 def consultar():
     if request.method == 'GET':
         plantacao = request.args.get('plantacao')
-        dias = int(request.args.get('dias', 7))
+        data_fornecida = request.args.get('data', '')
     elif request.method == 'POST':
         data = request.json
         plantacao = data.get('plantacao')
-        dias = data.get('dias')
+        data_fornecida = data.get('data', '')
 
-    data_inicio = datetime.now() - timedelta(days=dias)
-    data_inicio_str = data_inicio.strftime('%Y-%m-%d')
+    if data_fornecida:
+        data = datetime.strptime(data_fornecida, '%d-%m-%Y')
+    else:
+        data = datetime.now() - timedelta(days=1)
+
+    data_inicio_str = data.strftime('%d-%m-%Y')
 
     try:
         conn = connect_to_database()
         cursor = conn.cursor()
-        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao >= %s", (plantacao, data_inicio_str))
+        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao = %s", (plantacao, data_inicio_str))
         resultado = cursor.fetchone()[0]
         conn.close()
-        return render_template('formulario.html', producao=resultado, plantacao=plantacao, dias=dias)
+        return render_template('formulario.html', producao=resultado, plantacao=plantacao, data=data_inicio_str)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 # Endpoint para consultar o banco de dados
 @app.route('/consultar-banco-de-dados', methods=['GET', 'POST'])
 def consultar_banco_de_dados():
-    if request.method == 'GET':
-        try:
+    try:
+        if request.method == 'GET':
             plantacao = request.args.get('plantacao')
-            dias = int(request.args.get('dias', 7))
-            data_inicio = datetime.now() - timedelta(days=dias)
-            data_inicio_str = data_inicio.strftime('%Y-%m-%d')
-
-            conn = connect_to_database()
-            cursor = conn.cursor()
-            cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao >= %s", (plantacao, data_inicio_str))
-            total_colheita = cursor.fetchone()[0]
-            conn.close()
-
-            return jsonify({'plantacao': plantacao, 'dias': dias, 'total_colheita': total_colheita})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    elif request.method == 'POST':
-        try:
+            data_fornecida = request.args.get('data', '')
+        elif request.method == 'POST':
             data = request.json
             plantacao = data.get('plantacao')
-            dias = int(data.get('dias', 7))
-            data_inicio = datetime.now() - timedelta(days=dias)
-            data_inicio_str = data_inicio.strftime('%Y-%m-%d')
+            data_fornecida = data.get('data', '')
 
-            conn = connect_to_database()
-            cursor = conn.cursor()
-            cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao >= %s", (plantacao, data_inicio_str))
-            total_colheita = cursor.fetchone()[0]
-            conn.close()
+        if data_fornecida:
+            data = datetime.strptime(data_fornecida, '%d-%m-%Y')
+        else:
+            data = datetime.now() - timedelta(days=1)
 
-            return jsonify({'plantacao': plantacao, 'dias': dias, 'total_colheita': total_colheita})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+        data_inicio_str = data.strftime('%d-%m-%Y')
+
+        conn = connect_to_database()
+        cursor = conn.cursor()
+        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao = %s", (plantacao, data_inicio_str))
+        total_colheita = cursor.fetchone()[0]
+        conn.close()
+
+        return jsonify({'plantacao': plantacao, 'data': data_inicio_str, 'total_colheita': total_colheita})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
