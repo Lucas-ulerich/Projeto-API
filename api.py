@@ -46,23 +46,41 @@ def consultar():
         return jsonify({'error': str(e)}), 500
 
 # Endpoint para consultar o banco de dados
-@app.route('/consultar-banco-de-dados', methods=['GET'])
+@app.route('/consultar-banco-de-dados', methods=['GET', 'POST'])
 def consultar_banco_de_dados():
-    try:
-        plantacao = request.args.get('plantacao')
-        dias = int(request.args.get('dias', 7))
-        data_inicio = datetime.now() - timedelta(days=dias)
-        data_inicio_str = data_inicio.strftime('%Y-%m-%d')
+    if request.method == 'GET':
+        try:
+            plantacao = request.args.get('plantacao')
+            dias = int(request.args.get('dias', 7))
+            data_inicio = datetime.now() - timedelta(days=dias)
+            data_inicio_str = data_inicio.strftime('%Y-%m-%d')
 
-        conn = connect_to_database()
-        cursor = conn.cursor()
-        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao >= %s", (plantacao, data_inicio_str))
-        total_colheita = cursor.fetchone()[0]
-        conn.close()
+            conn = connect_to_database()
+            cursor = conn.cursor()
+            cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao >= %s", (plantacao, data_inicio_str))
+            total_colheita = cursor.fetchone()[0]
+            conn.close()
 
-        return jsonify({'plantacao': plantacao, 'dias': dias, 'total_colheita': total_colheita})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+            return jsonify({'plantacao': plantacao, 'dias': dias, 'total_colheita': total_colheita})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    elif request.method == 'POST':
+        try:
+            data = request.json
+            plantacao = data.get('plantacao')
+            dias = int(data.get('dias', 7))
+            data_inicio = datetime.now() - timedelta(days=dias)
+            data_inicio_str = data_inicio.strftime('%Y-%m-%d')
+
+            conn = connect_to_database()
+            cursor = conn.cursor()
+            cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao >= %s", (plantacao, data_inicio_str))
+            total_colheita = cursor.fetchone()[0]
+            conn.close()
+
+            return jsonify({'plantacao': plantacao, 'dias': dias, 'total_colheita': total_colheita})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
