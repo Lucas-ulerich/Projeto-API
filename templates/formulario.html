@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Consulta de Produção</title>
+</head>
+<body>
+    <div class="container">
+        <div class="formulario">
+            <h1>Consulta de Produção</h1>
+            <form id="consulta-form" action="/consultar" method="GET">
+                <label for="plantacao">Escolha a plantação:</label>
+                <select name="plantacao" id="plantacao">
+                    <option value="Cana de acucar">Cana de Açúcar</option>
+                    <option value="milho">Milho</option>
+                    <option value="Trigo">Trigo</option>
+                    <option value="Arroz">Arroz</option>
+                </select>
+                <br>
+                <label for="dias">Escolha o número de dias:</label>
+                <select name="dias" id="dias">
+                    <option value="7">7 dias</option>
+                    <option value="15">15 dias</option>
+                    <option value="30">30 dias</option>
+                </select>
+                <br>
+                <input type="submit" value="Consultar">
+                <input type="button" value="Limpar" onclick="limparFormulario()">
+            </form>
+        </div>
+        
+        <div id="resultado-producao" class="producao-info">
+            {% if producao %}
+                <h3>Produção de {{ plantacao }} nos últimos {{ dias }} dias:</h2>
+                <p>Produção: {{ producao }} unidades</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function limparFormulario() {
+            document.getElementById("consulta-form").reset();
+            document.getElementById("resultado-producao").style.display = "none";
+        }
+    </script>
+</body>
+</html>
