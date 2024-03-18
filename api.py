@@ -33,11 +33,11 @@ def consultar():
         data_fornecida = data.get('data', '')
 
     if data_fornecida:
-        data = datetime.strptime(data_fornecida, '%d-%m-%Y').strftime('%Y-%m-%d')
+        data = datetime.strptime(data_fornecida, '%d-%m-%Y')
     else:
-        data = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        data = datetime.now() - timedelta(days=1)
 
-    data_inicio_str = data
+    data_inicio_str = data.strftime('%Y-%m-%d')
 
     try:
         conn = connect_to_database()
