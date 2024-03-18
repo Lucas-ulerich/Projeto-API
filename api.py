@@ -22,10 +22,16 @@ def index():
     return render_template('formulario.html')
 
 # Rota para processar o formulário
-@app.route('/consultar', methods=['GET'])
+@app.route('/consultar', methods=['GET', 'POST'])
 def consultar():
-    plantacao = request.args.get('plantacao')
-    dias = int(request.args.get('dias', 7))
+    if request.method == 'GET':
+        plantacao = request.args.get('plantacao')
+        dias = int(request.args.get('dias', 7))
+    elif request.method == 'POST':
+        data = request.json
+        plantacao = data.get('plantacao')
+        dias = data.get('dias')
+
     data_inicio = datetime.now() - timedelta(days=dias)
     data_inicio_str = data_inicio.strftime('%Y-%m-%d')
 
