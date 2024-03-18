@@ -39,18 +39,24 @@ def consultar():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Novo endpoint para a API
-@app.route('/endpointAPI', methods=['GET', 'POST'])
-def novo_endpoint():
-    if request.method == 'GET':
-        # Lógica para lidar com solicitações GET
-        return jsonify({'message': 'GET request received'})
-    elif request.method == 'POST':
-        # Lógica para lidar com solicitações POST
-        data = request.json  
-        return jsonify({'message': 'POST request received', 'data': data})
-    else:
-        return jsonify({'error': 'Unsupported HTTP method'}), 405
+# Endpoint para consultar o banco de dados
+@app.route('/consultar-banco-de-dados', methods=['GET'])
+def consultar_banco_de_dados():
+    try:
+        plantacao = request.args.get('plantacao')
+        dias = int(request.args.get('dias', 7))
+        data_inicio = datetime.now() - timedelta(days=dias)
+        data_inicio_str = data_inicio.strftime('%Y-%m-%d')
+
+        conn = connect_to_database()
+        cursor = conn.cursor()
+        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao >= %s", (plantacao, data_inicio_str))
+        total_colheita = cursor.fetchone()[0]
+        conn.close()
+
+        return jsonify({'plantacao': plantacao, 'dias': dias, 'total_colheita': total_colheita})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
