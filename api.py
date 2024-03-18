@@ -6,10 +6,10 @@ app = Flask(__name__)
 
 # Configurações do banco de dados
 db_config = {
-    'host': 'localhost',
-    'user': 'lucas_ulerich',
-    'password': '1080',
-    'database': 'fazenda'
+    'host': 'LucasUlerich.mysql.pythonanywhere-services.com',
+    'user': 'LucasUlerich',
+    'password': 'godofwar3',
+    'database': 'LucasUlerich$FazendaDB'
 }
 
 # Função para conectar ao banco de dados
