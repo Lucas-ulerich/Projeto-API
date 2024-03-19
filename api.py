@@ -34,7 +34,11 @@ def consultar_banco_de_dados():
         if volume:
             # Alterando a forma como a opção é exibida
             opcao_formatada = opcao.replace('últimos', '- Últimos')
-            return jsonify({'opcao': opcao_formatada, 'volume': volume[0]})
+            # Formatando o volume com separadores de milhar e sem casas decimais
+            volume_formatado = '{:,.0f}'.format(float(volume[0])).replace(',', '.')
+            # Adicionando a unidade "toneladas" ao volume
+            volume_com_unidade = "{} toneladas".format(volume_formatado)
+            return jsonify({'opcao': opcao_formatada, 'volume': volume_com_unidade})
         else:
             return jsonify({'error': 'Opcao nao encontrada'}), 404
     except Exception as e:
