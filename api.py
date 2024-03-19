@@ -1,6 +1,5 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 import mysql.connector
-from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -16,61 +15,28 @@ db_config = {
 def connect_to_database():
     return mysql.connector.connect(**db_config)
 
-# Rota para renderizar o formulário HTML
-@app.route('/')
-def index():
-    return render_template('formulario.html')
-
-# Rota para processar o formulário
-@app.route('/consultar', methods=['GET', 'POST'])
-def consultar():
-    if request.method == 'GET':
-        plantacao = request.args.get('plantacao')
-        data_fornecida = request.args.get('data', '')
-    elif request.method == 'POST':
-        data = request.json
-        plantacao = data.get('plantacao')
-        data_fornecida = data.get('data', '')
-
-    if data_fornecida:
-        data = datetime.strptime(data_fornecida, '%d-%m-%Y').strftime('%Y-%m-%d')
-    else:
-        data = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-
-    try:
-        conn = connect_to_database()
-        cursor = conn.cursor()
-        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao = %s", (plantacao, data))
-        resultado = cursor.fetchone()[0]
-        conn.close()
-        return render_template('formulario.html', producao=resultado, plantacao=plantacao, data=data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# Endpoint para consultar o banco de dados
+# Rota para consultar o banco de dados
 @app.route('/consultar-banco-de-dados', methods=['GET', 'POST'])
 def consultar_banco_de_dados():
     try:
         if request.method == 'GET':
-            plantacao = request.args.get('plantacao')
-            data_fornecida = request.args.get('data', '')
+            opcao = request.args.get('Opcoes')
         elif request.method == 'POST':
             data = request.json
-            plantacao = data.get('plantacao')
-            data_fornecida = data.get('data', '')
-
-        if data_fornecida:
-            data = datetime.strptime(data_fornecida, '%d-%m-%Y').strftime('%Y-%m-%d')
-        else:
-            data = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-
+            opcao = data.get('Opcoes')
+        
         conn = connect_to_database()
         cursor = conn.cursor()
-        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao = %s", (plantacao, data))
-        total_colheita = cursor.fetchone()[0]
+        cursor.execute("SELECT Volume FROM Producao WHERE Opcoes = %s", (opcao,))
+        volume = cursor.fetchone()
         conn.close()
 
-        return jsonify({'plantacao': plantacao, 'data': data, 'total_colheita': total_colheita})
+        if volume:
+            # Alterando a forma como a opção é exibida
+            opcao_formatada = opcao.replace('últimos', '- Últimos')
+            return jsonify({'opcao': opcao_formatada, 'volume': volume[0]})
+        else:
+            return jsonify({'error': 'Opcao nao encontrada'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
