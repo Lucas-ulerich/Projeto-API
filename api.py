@@ -35,7 +35,7 @@ def consultar():
     if data_fornecida:
         data = datetime.strptime(data_fornecida, '%d-%m-%Y').strftime('%Y-%m-%d')
     else:
-        data = datetime.now().strftime('%Y-%m-%d')  # Correção aqui
+        data = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
     try:
         conn = connect_to_database()
@@ -62,7 +62,7 @@ def consultar_banco_de_dados():
         if data_fornecida:
             data = datetime.strptime(data_fornecida, '%d-%m-%Y').strftime('%Y-%m-%d')
         else:
-            data = datetime.now().strftime('%Y-%m-%d')
+            data = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
         data_inicio_str = data
 
