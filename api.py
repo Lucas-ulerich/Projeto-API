@@ -12,7 +12,6 @@ db_config = {
     'database': 'LucasUlerich$FazendaDB'
 }
 
-
 # Função para conectar ao banco de dados
 def connect_to_database():
     return mysql.connector.connect(**db_config)
@@ -65,15 +64,13 @@ def consultar_banco_de_dados():
         else:
             data = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-        data_inicio_str = data
-
         conn = connect_to_database()
         cursor = conn.cursor()
-        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao = %s", (plantacao, data_inicio_str))
+        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao = %s", (plantacao, data))
         total_colheita = cursor.fetchone()[0]
         conn.close()
 
-        return jsonify({'plantacao': plantacao, 'data': data_inicio_str, 'total_colheita': total_colheita})
+        return jsonify({'plantacao': plantacao, 'data': data, 'total_colheita': total_colheita})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
