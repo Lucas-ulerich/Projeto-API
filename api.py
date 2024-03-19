@@ -33,19 +33,17 @@ def consultar():
         data_fornecida = data.get('data', '')
 
     if data_fornecida:
-        data = datetime.strptime(data_fornecida, '%d-%m-%Y')
+        data = datetime.strptime(data_fornecida, '%d-%m-%Y').strftime('%Y-%m-%d')
     else:
-        data = datetime.now() - timedelta(days=1)
-
-    data_inicio_str = data.strftime('%Y-%m-%d')
+        data = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')  # Correção aqui
 
     try:
         conn = connect_to_database()
         cursor = conn.cursor()
-        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao = %s", (plantacao, data_inicio_str))
+        cursor.execute("SELECT SUM(Quantidade_colheita) FROM Producao WHERE Plantacao = %s AND Data_plantacao = %s", (plantacao, data))
         resultado = cursor.fetchone()[0]
         conn.close()
-        return render_template('formulario.html', producao=resultado, plantacao=plantacao, data=data_inicio_str)
+        return render_template('formulario.html', producao=resultado, plantacao=plantacao, data=data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
