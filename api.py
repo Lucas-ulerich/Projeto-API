@@ -12,6 +12,7 @@ db_config = {
     'database': 'LucasUlerich$FazendaDB'
 }
 
+
 # Função para conectar ao banco de dados
 def connect_to_database():
     return mysql.connector.connect(**db_config)
